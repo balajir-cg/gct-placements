@@ -267,17 +267,7 @@ export default function SignupPage() {
                   </Select>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="isPlacementRep"
-                    checked={formData.isPlacementRep}
-                    onCheckedChange={(checked) => setFormData({ ...formData, isPlacementRep: checked as boolean })}
-                  />
-                  <Label htmlFor="isPlacementRep" className="text-sm font-normal">
-                    I am a Placement Representative for my department
-                  </Label>
-                </div>
-
+                
                 <Button
                   type="submit"
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"

@@ -55,10 +55,8 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto text-center max-w-4xl">
-          <Badge className="mb-6 bg-blue-100 text-blue-700 hover:bg-blue-100">
-            <Star className="w-4 h-4 mr-2" />
-            Trusted by 10,000+ Students
-          </Badge>
+         
+       
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             Your Gateway to
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -67,7 +65,7 @@ export default function LandingPage() {
             </span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            Connect with top recruiters, showcase your skills, and land your perfect job. GCT's comprehensive placement
+             GCT's comprehensive placement
             platform designed for student success.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -92,11 +90,7 @@ export default function LandingPage() {
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                <Link href="/admin/login">
-                  <Button size="lg" variant="outline">
-                    Recruiter Access
-                  </Button>
-                </Link>
+                
               </>
             )}
           </div>
@@ -104,7 +98,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white">
+     { /*<section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
@@ -137,7 +131,7 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section>*/}
 
       {/* Features Section */}
       <section className="py-20 px-4">
@@ -149,8 +143,8 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+           {/* <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <Target className="w-6 h-6 text-blue-600" />
@@ -161,7 +155,7 @@ export default function LandingPage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-
+*/}
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
@@ -172,7 +166,7 @@ export default function LandingPage() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+           {/* <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-purple-600" />
@@ -182,7 +176,7 @@ export default function LandingPage() {
                   Comprehensive admin panel for placement officers to manage jobs and students
                 </CardDescription>
               </CardHeader>
-            </Card>
+            </Card>*/}
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
@@ -196,7 +190,7 @@ export default function LandingPage() {
               </CardHeader>
             </Card>
 
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+           {/* <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
                   <TrendingUp className="w-6 h-6 text-red-600" />
@@ -207,8 +201,8 @@ export default function LandingPage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+*/}
+          {/*  <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-4">
                   <Building2 className="w-6 h-6 text-cyan-600" />
@@ -216,7 +210,7 @@ export default function LandingPage() {
                 <CardTitle>Company Integration</CardTitle>
                 <CardDescription>Seamless integration with top companies for direct recruitment</CardDescription>
               </CardHeader>
-            </Card>
+            </Card>*/}
           </div>
         </div>
       </section>
@@ -226,7 +220,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-6">Ready to Launch Your Career?</h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Join thousands of GCT students who have successfully landed their dream jobs through our platform
+
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isAuthenticated ? (
@@ -242,15 +236,6 @@ export default function LandingPage() {
                   <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
                     Create Student Account
                     <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Link>
-                <Link href="/admin/signup">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-blue-600 bg-transparent"
-                  >
-                    Register as Recruiter
                   </Button>
                 </Link>
               </>
@@ -295,11 +280,11 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">For Recruiters</h3>
+              <h3 className="text-lg font-semibold mb-4">For Placement officers</h3>
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <Link href="/admin/signup" className="hover:text-white">
-                    Register Company
+                    Extract Student Data
                   </Link>
                 </li>
                 <li>
@@ -325,7 +310,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 GCT Placement Portal. All rights reserved.</p>
+            <p> GCT Placement Portal</p>
           </div>
         </div>
       </footer>

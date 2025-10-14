@@ -198,7 +198,7 @@ export default function AdminDashboard() {
     const totalApplications = applications.length
     const pendingApplications = applications.filter(app => app.status === 'applied').length
     const interviewScheduled = applications.filter(app => app.status === 'interview_scheduled').length
-    const selectedCandidates = applications.filter(app => app.status === 'selected').length
+    const selectedCandidates = applications.filter(app => app.status === 'shortlisted').length
     
     return {
       total: totalApplications,
@@ -452,7 +452,7 @@ export default function AdminDashboard() {
                       <SelectItem value="applied">Applied</SelectItem>
                       <SelectItem value="under_review">Under Review</SelectItem>
                       <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                      <SelectItem value="selected">Selected</SelectItem>
+                      <SelectItem value="shortlisted">Selected</SelectItem>
                       <SelectItem value="rejected">Rejected</SelectItem>
                     </SelectContent>
                   </Select>
@@ -563,13 +563,13 @@ export default function AdminDashboard() {
                               <SelectItem value="applied">Applied</SelectItem>
                               <SelectItem value="under_review">Under Review</SelectItem>
                               <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-                              <SelectItem value="selected">Selected</SelectItem>
+                              <SelectItem value="shortlisted">Selected</SelectItem>
                               <SelectItem value="rejected">Rejected</SelectItem>
                             </SelectContent>
                           </Select>
                           <Badge
                             variant={
-                              application.status === "selected"
+                              application.status === "shortlisted"
                                 ? "default"
                                 : application.status === "interview_scheduled"
                                   ? "secondary"
@@ -579,7 +579,9 @@ export default function AdminDashboard() {
                             }
                             className="w-fit sm:w-auto justify-center"
                           >
-                            {application.status.replace('_', ' ').toUpperCase()}
+                            {application.status === 'shortlisted' 
+                              ? 'SELECTED' 
+                              : application.status.replace('_', ' ').toUpperCase()}
                           </Badge>
                         </div>
                       </div>

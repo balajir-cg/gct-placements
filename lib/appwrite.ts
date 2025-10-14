@@ -128,7 +128,7 @@ export interface Application {
   userId: string
   jobTitle: string
   company: string
-  status: 'applied' | 'under_review' | 'interview_scheduled' | 'selected' | 'rejected'
+  status: 'applied' | 'under_review' | 'interview_scheduled' | 'shortlisted' | 'rejected'
   appliedAt: string
   createdAt: string
   updatedAt: string
