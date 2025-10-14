@@ -224,8 +224,17 @@ export default function StudentDashboard() {
                       <span className="hidden sm:inline">Admin Panel</span>
                       <span className="sm:hidden">Admin</span>
                     </Button>
+                    
                   </Link>
+                  
                 )}
+                
+                <Link href="/forum">
+                  <Button variant="outline" size="sm">
+                    💬
+                    <span className="ml-1 sm:ml-2">Forum</span>
+                  </Button>
+                </Link>
                 
                 <Link href="/profile">
                   <Button variant="ghost" size="sm">

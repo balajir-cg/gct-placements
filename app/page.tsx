@@ -30,9 +30,14 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
-              <Link href={getDashboardLink()}>
-                <Button>Go to Dashboard</Button>
-              </Link>
+              <>
+                <Link href="/forum">
+                  <Button variant="outline">💬 Forum</Button>
+                </Link>
+                <Link href={getDashboardLink()}>
+                  <Button>Go to Dashboard</Button>
+                </Link>
+              </>
             ) : (
               <>
                 <Link href="/login">

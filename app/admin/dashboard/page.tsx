@@ -263,6 +263,13 @@ export default function AdminDashboard() {
                     </Button>
                   </Link>
                 )}
+                <Link href="/forum">
+                  <Button variant="outline" size="sm">
+                    💬
+                    <span className="ml-1 sm:ml-2">Forum</span>
+                  </Button>
+                </Link>
+                
               
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
                   <LogOut className="w-4 h-4" />

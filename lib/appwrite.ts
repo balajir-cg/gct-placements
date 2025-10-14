@@ -27,6 +27,8 @@ export const config = {
     placements: process.env.NEXT_PUBLIC_APPWRITE_PLACEMENTS_COLLECTION_ID || 'placements',
     companies: process.env.NEXT_PUBLIC_APPWRITE_COMPANIES_COLLECTION_ID || 'companies',
     adminRoles: process.env.NEXT_PUBLIC_APPWRITE_ADMIN_ROLES_COLLECTION_ID || 'admin_roles',
+    forumPosts: process.env.NEXT_PUBLIC_APPWRITE_FORUM_POSTS_COLLECTION_ID || 'forum_posts',
+    forumComments: process.env.NEXT_PUBLIC_APPWRITE_FORUM_COMMENTS_COLLECTION_ID || 'forum_comments',
   },
   allowedEmailDomain: process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN || 'gct.ac.in'
 }
@@ -229,4 +231,32 @@ export interface AdminRole {
   isActive: boolean
   createdAt: string
   updatedAt: string
+}
+
+// Forum interfaces
+export interface ForumPost {
+  $id: string
+  title: string
+  content: string
+  authorId: string
+  authorName: string
+  tags?: string[]
+  category: string
+  viewCount: number
+  commentCount: number
+  isPinned: boolean
+  isClosed: boolean
+  $createdAt: string
+  $updatedAt: string
+}
+
+export interface ForumComment {
+  $id: string
+  postId: string
+  content: string
+  authorId: string
+  authorName: string
+  parentCommentId?: string
+  $createdAt: string
+  $updatedAt: string
 } 

@@ -187,6 +187,11 @@ export default function JobsPage() {
                 </div>
               </div>
             </div>
+            <Link href="/forum">
+              <Button variant="outline" size="sm">
+                💬 Forum
+              </Button>
+            </Link>
           </div>
         </header>
 

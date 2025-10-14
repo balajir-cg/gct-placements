@@ -196,26 +196,33 @@ export default function PlacementsPage() {
               </div>
             </div>
             
-            {/* Bottom Row: Admin Actions */}
-            {isAdmin && (
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode(viewMode === "grid" ? "table" : "grid")}
-                  className="flex-1"
-                >
-                  {viewMode === "grid" ? "Table View" : "Grid View"}
+            {/* Bottom Row: Forum + Admin Actions */}
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Link href="/forum" className="flex-1">
+                <Button variant="outline" size="sm" className="w-full">
+                  💬 Forum
                 </Button>
-                <Link href="/admin/add-placement" className="flex-1">
-                  <Button className="w-full">
-                    <Plus className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Add Placement Record</span>
-                    <span className="sm:hidden">Add Record</span>
+              </Link>
+              {isAdmin && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setViewMode(viewMode === "grid" ? "table" : "grid")}
+                    className="flex-1"
+                  >
+                    {viewMode === "grid" ? "Table View" : "Grid View"}
                   </Button>
-                </Link>
-              </div>
-            )}
+                  <Link href="/admin/add-placement" className="flex-1">
+                    <Button className="w-full">
+                      <Plus className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Add Placement Record</span>
+                      <span className="sm:hidden">Add Record</span>
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Desktop Layout */}
@@ -237,23 +244,30 @@ export default function PlacementsPage() {
                 </div>
               </div>
             </div>
-            {isAdmin && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode(viewMode === "grid" ? "table" : "grid")}
-                >
-                  {viewMode === "grid" ? "Table View" : "Grid View"}
+            <div className="flex gap-2">
+              <Link href="/forum">
+                <Button variant="outline" size="sm">
+                  💬 Forum
                 </Button>
-                <Link href="/admin/add-placement">
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Placement Record
+              </Link>
+              {isAdmin && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setViewMode(viewMode === "grid" ? "table" : "grid")}
+                  >
+                    {viewMode === "grid" ? "Table View" : "Grid View"}
                   </Button>
-                </Link>
-              </div>
-            )}
+                  <Link href="/admin/add-placement">
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Placement Record
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>
