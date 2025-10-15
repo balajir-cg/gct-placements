@@ -865,8 +865,7 @@ export default function AdminPage() {
 |------|-------------|-------------|
 | **🎓 Student** | Student Portal | • Create & manage profile<br>• Browse & apply for jobs<br>• Track application status<br>• Upload resumes & documents<br>• Participate in forum discussions<br>• View placement statistics |
 | **👥 Placement Representative** | Dual Access | • All student permissions<br>• Switch between portals<br>• Access basic admin features<br>• Assist in placement coordination |
-| **🏢 Placement Officer** | Admin Portal Only | • Manage job postings<br>• Review applications<br>• Update application status<br>• Create placement records<br>• View analytics & reports<br>• Moderate forum content |
-| **⚙️ Placement Coordinator** | Full Admin Access | • All officer permissions<br>• Manage admin roles<br>• System administration<br>• Advanced analytics<br>• Database management |
+| **⚙️ Placement Coordinator** | Full Admin Access | • Manage job postings<br>• Review applications<br>• Update application status<br>• Create placement records<br>• Manage admin roles<br>• View analytics & reports<br>• Moderate forum content<br>• System administration |
 
 ---
 
