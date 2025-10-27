@@ -1,6 +1,300 @@
 # Automated Appwrite Setup Scripts
 
-This directory contains automated setup scripts for configuring your Appwrite backend.
+# 🛠️ Scripts Directory
+
+This directory contains utility scripts for setting up, seeding, and managing the GCT Placement Portal.
+
+---
+
+## 📋 Available Scripts
+
+### 1. **setup-forum-collections.js** - Forum Database Setup
+Creates the forum_posts and forum_comments collections in Appwrite with proper attributes, indexes, and permissions.
+
+**Usage:**
+```bash
+node scripts/setup-forum-collections.js
+```
+
+**What it does:**
+- ✅ Creates `forum_posts` collection with all attributes
+- ✅ Creates `forum_comments` collection with all attributes
+- ✅ Sets up proper indexes for performance
+- ✅ Configures read/write permissions
+
+---
+
+### 2. **seed-database.js** - Test Data Generator
+Populates the database with realistic test data for development and testing purposes.
+
+**Usage:**
+```bash
+node scripts/seed-database.js
+```
+
+**What it creates:**
+- 👥 **3 Admin Roles**: Coordinator, Officer, Placement Rep
+- 🎓 **16 Students**: With complete profiles across 6 departments
+- 💼 **8 Jobs**: From companies like Google, Microsoft, Amazon, TCS
+- 📋 **Applications**: 3-8 applications per job with various statuses
+- 🏆 **Placements**: Automatic placement records for shortlisted students
+- 💬 **5 Forum Posts**: Discussion topics across different categories
+- 💭 **Comments**: 2-5 comments per forum post
+
+**Test Login Credentials:**
+- **Student**: Any generated email (e.g., `rajesh.kumar.21cs001@gct.ac.in`)
+- **Password**: `Test@123` (for all students)
+- **Admin**: `coordinator@gct.ac.in` (set password in Appwrite console)
+
+**Features:**
+- ✅ Clears existing test data before seeding (optional)
+- ✅ Respects foreign key constraints
+- ✅ Creates realistic data with proper relationships
+- ✅ Handles errors gracefully
+- ✅ Shows detailed progress logs
+
+---
+
+### 3. **create-initial-admin.js** - Admin Setup
+Creates the first admin user for the system.
+
+**Usage:**
+```bash
+node scripts/create-initial-admin.js
+```
+
+---
+
+### 4. **export.js** - Data Export Utility
+Exports data from Appwrite collections to JSON files.
+
+**Usage:**
+```bash
+node scripts/export.js
+```
+
+---
+
+### 5. **import.js** - Data Import Utility
+Imports data from JSON files into Appwrite collections.
+
+**Usage:**
+```bash
+node scripts/import.js
+```
+
+---
+
+## 🚀 Quick Start Guide
+
+### Prerequisites
+
+1. **Appwrite Setup**: Ensure Appwrite project is configured
+2. **Environment Variables**: Set up `.env.local` with all required variables
+3. **Collections Created**: Run `setup-forum-collections.js` first
+4. **API Key**: Set `APPWRITE_API_KEY` in `.env.local`
+
+### Step-by-Step Setup
+
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your Appwrite credentials
+
+# 3. Create forum collections
+node scripts/setup-forum-collections.js
+
+# 4. Seed test data
+node scripts/seed-database.js
+
+# 5. Start development server
+pnpm dev
+```
+
+---
+
+## 🔑 Required Environment Variables
+
+For scripts to work, ensure these variables are set in `.env.local`:
+
+```env
+# Appwrite Configuration
+NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=placement-db
+APPWRITE_API_KEY=your-api-key
+
+# Collection IDs
+NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID=users
+NEXT_PUBLIC_APPWRITE_JOBS_COLLECTION_ID=jobs
+NEXT_PUBLIC_APPWRITE_APPLICATIONS_COLLECTION_ID=applications
+NEXT_PUBLIC_APPWRITE_PLACEMENTS_COLLECTION_ID=placements
+NEXT_PUBLIC_APPWRITE_ADMIN_ROLES_COLLECTION_ID=admin_roles
+NEXT_PUBLIC_APPWRITE_FORUM_POSTS_COLLECTION_ID=forum_posts
+NEXT_PUBLIC_APPWRITE_FORUM_COMMENTS_COLLECTION_ID=forum_comments
+
+# Storage
+NEXT_PUBLIC_APPWRITE_STORAGE_BUCKET_ID=placement-files
+```
+
+---
+
+## 📊 Seeded Data Details
+
+### Students (16 total)
+- **Departments**: Distributed across 6 departments
+- **Batches**: 2021-2025 (8 students), 2022-2026 (8 students)
+- **CGPA Range**: 6.5 to 9.5
+- **Profiles**: Complete with academic records, contact info, skills
+- **Roll Numbers**: Generated in format: `21CS001`, `22IT002`, etc.
+
+### Jobs (8 companies)
+| Company | Location | Min CGPA | Salary Range (LPA) |
+|---------|----------|----------|-------------------|
+| Google | Bangalore | 8.0 | 20 - 25 |
+| Microsoft | Hyderabad | 7.5 | 18 - 22 |
+| Amazon | Bangalore | 7.0 | 15 - 20 |
+| TCS | Chennai | 6.0 | 3.5 - 6 |
+| Infosys | Bangalore | 6.5 | 4.5 - 7 |
+| Wipro | Chennai | 6.0 | 4 - 6.5 |
+| Zoho | Chennai | 7.0 | 6 - 12 |
+| Freshworks | Chennai | 7.5 | 8 - 15 |
+
+### Applications
+- **Status Distribution**:
+  - Applied: ~30%
+  - Under Review: ~25%
+  - Interview Scheduled: ~20%
+  - Shortlisted: ~15%
+  - Rejected: ~10%
+- **Per Job**: 3-8 applications
+- **Eligibility**: Only eligible students apply (department + CGPA match)
+
+### Forum Posts (5 categories)
+- Interview Experiences
+- Placement Tips
+- Company Reviews
+- Resume Review
+- Technical Doubts
+
+---
+
+## 🧹 Clearing Data
+
+The seed script includes a `clearCollections()` function that removes all existing test data before seeding. This ensures a clean slate.
+
+To keep existing data while adding new data:
+1. Comment out the `await clearCollections()` line in `seed-database.js`
+2. Run the script
+
+---
+
+## ⚠️ Important Notes
+
+### Security
+- ⚠️ **Never use seeded data in production!**
+- ⚠️ All test users have the same password: `Test@123`
+- ⚠️ Change passwords before deploying to production
+- ⚠️ The API key should have full permissions for scripts to work
+
+### Appwrite Limits
+- Free tier has limits on documents, users, and storage
+- Consider using self-hosted Appwrite for heavy testing
+- Monitor your usage in Appwrite dashboard
+
+### Data Integrity
+- Scripts respect foreign key relationships
+- Deletion order: Comments → Posts → Applications → Placements → Jobs → Users
+- Creation order: Admins → Users → Jobs → Applications → Posts → Comments
+
+---
+
+## 🐛 Troubleshooting
+
+### Error: "Collection not found"
+**Solution**: Run `setup-forum-collections.js` first to create collections
+
+### Error: "Invalid API key"
+**Solution**: Set `APPWRITE_API_KEY` in `.env.local` with full permissions
+
+### Error: "Attribute not available"
+**Solution**: Wait 5-10 seconds after creating collections for attributes to become available
+
+### Error: "Document already exists"
+**Solution**: The script auto-clears data, but you can manually delete from Appwrite console
+
+### Error: "Rate limit exceeded"
+**Solution**: Add delays in script or use self-hosted Appwrite
+
+---
+
+## 📝 Customizing Seed Data
+
+### Adding More Students
+Edit the `STUDENT_NAMES` array in `seed-database.js`:
+
+```javascript
+const STUDENT_NAMES = [
+  'Your Name 1',
+  'Your Name 2',
+  // ... add more
+];
+```
+
+### Adding More Companies
+Edit the `COMPANIES` array:
+
+```javascript
+const COMPANIES = [
+  { 
+    name: 'Your Company', 
+    location: 'City', 
+    minCGPA: '7.0', 
+    salary: [800000, 1500000] 
+  },
+  // ... add more
+];
+```
+
+### Changing Application Distribution
+Modify the `statuses` array probabilities in `seedApplications()`:
+
+```javascript
+// Current: equal distribution
+const statuses = ['applied', 'under_review', 'interview_scheduled', 'shortlisted', 'rejected'];
+
+// Custom: more applications pending
+const statuses = ['applied', 'applied', 'applied', 'under_review', 'rejected'];
+```
+
+---
+
+## 🔄 Resetting Database
+
+To completely reset and reseed:
+
+```bash
+# 1. Clear all data (script does this automatically)
+node scripts/seed-database.js
+
+# 2. Or manually delete from Appwrite console
+# Go to Database → Collections → Delete all documents
+```
+
+---
+
+## 📖 Additional Resources
+
+- [Appwrite Documentation](https://appwrite.io/docs)
+- [Appwrite Node SDK](https://appwrite.io/docs/getting-started-for-server)
+- [Project Setup Guide](../README.md)
+
+---
+
+**Need help?** Open an issue on GitHub or check the main README.md
 
 ## Quick Setup Guide
 

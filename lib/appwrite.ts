@@ -225,7 +225,7 @@ export interface Company {
 export interface AdminRole {
   $id: string
   email: string
-  role: UserRole.PLACEMENT_REP | UserRole.PLACEMENT_OFFICER | UserRole.PLACEMENT_COORDINATOR
+  role: UserRole.PLACEMENT_REP | UserRole.PLACEMENT_COORDINATOR
   name: string
   department?: string
   isActive: boolean

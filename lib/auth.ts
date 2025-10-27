@@ -263,7 +263,7 @@ export class AuthService {
     
     return false
   }
-
+  
   // Check if user should have admin-only access (officers and coordinators)
   static hasAdminOnlyAccess(user: any): boolean {
     if (!user || !user.adminRole || !user.adminRole.isActive) return false
