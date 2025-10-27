@@ -37,7 +37,6 @@ export const config = {
 export enum UserRole {
   STUDENT = 'student',
   PLACEMENT_REP = 'placement_rep',
-  PLACEMENT_OFFICER = 'placement_officer',
   PLACEMENT_COORDINATOR = 'placement_coordinator'
 }
 
@@ -225,7 +224,7 @@ export interface Company {
 export interface AdminRole {
   $id: string
   email: string
-  role: UserRole.PLACEMENT_REP | UserRole.PLACEMENT_OFFICER | UserRole.PLACEMENT_COORDINATOR
+  role: UserRole.PLACEMENT_REP | UserRole.PLACEMENT_COORDINATOR
   name: string
   department?: string
   isActive: boolean

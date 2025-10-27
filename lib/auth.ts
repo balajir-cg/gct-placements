@@ -216,7 +216,7 @@ export class AuthService {
   static isAdmin(user: any): boolean {
     if (!user || !user.adminRole) return false
     
-    const adminRoles = [UserRole.PLACEMENT_REP, UserRole.PLACEMENT_OFFICER, UserRole.PLACEMENT_COORDINATOR]
+    const adminRoles = [UserRole.PLACEMENT_REP, UserRole.PLACEMENT_COORDINATOR]
     return adminRoles.includes(user.adminRole.role) && user.adminRole.isActive
   }
 
@@ -235,11 +235,6 @@ export class AuthService {
     }
     
     return false
-  }
-
-  // Check if user is placement officer
-  static isPlacementOfficer(user: any): boolean {
-    return this.hasRole(user, UserRole.PLACEMENT_OFFICER)
   }
 
   // Check if user is placement coordinator  
@@ -264,11 +259,10 @@ export class AuthService {
     return false
   }
 
-  // Check if user should have admin-only access (officers and coordinators)
+  // Check if user should have admin-only access (coordinators only)
   static hasAdminOnlyAccess(user: any): boolean {
     if (!user || !user.adminRole || !user.adminRole.isActive) return false
     
-    return user.adminRole.role === UserRole.PLACEMENT_OFFICER || 
-           user.adminRole.role === UserRole.PLACEMENT_COORDINATOR
+    return user.adminRole.role === UserRole.PLACEMENT_COORDINATOR
   }
 } 

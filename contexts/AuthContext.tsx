@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isAuthenticated = !!user
   const isAdmin = AuthService.isAdmin(user)
   const isPlacementRep = AuthService.isPlacementRep(user)
-  const isPlacementOfficer = AuthService.isPlacementOfficer(user)
+
   const isPlacementCoordinator = AuthService.isPlacementCoordinator(user)
   const hasStudentAccess = AuthService.hasStudentAccess(user)
   const hasAdminOnlyAccess = AuthService.hasAdminOnlyAccess(user)
@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated,
     isAdmin,
     isPlacementRep,
-    isPlacementOfficer,
+    
     isPlacementCoordinator,
     hasStudentAccess,
     hasAdminOnlyAccess,
