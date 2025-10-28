@@ -29,6 +29,7 @@ export const config = {
     adminRoles: process.env.NEXT_PUBLIC_APPWRITE_ADMIN_ROLES_COLLECTION_ID || 'admin_roles',
     forumPosts: process.env.NEXT_PUBLIC_APPWRITE_FORUM_POSTS_COLLECTION_ID || 'forum_posts',
     forumComments: process.env.NEXT_PUBLIC_APPWRITE_FORUM_COMMENTS_COLLECTION_ID || 'forum_comments',
+    academicRecords: process.env.NEXT_PUBLIC_APPWRITE_ACADEMIC_RECORDS_COLLECTION_ID || 'academic_records',
   },
   allowedEmailDomain: process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN || 'gct.ac.in'
 }
@@ -92,6 +93,9 @@ export interface UserProfile {
   historyOfArrear?: 'Yes' | 'No'
   activeBacklog?: 'Yes' | 'No'
   noOfBacklogs?: string
+  // College Academic Details (from marksheet)
+  historyOfArrearsCount?: string // Total arrears ever had (never decreases)
+  currentArrearsCount?: string // Active arrears count (decreases when cleared)
   // Files and Profiles
   profilePicture?: string
   resume?: string
@@ -259,4 +263,25 @@ export interface ForumComment {
   parentCommentId?: string
   $createdAt: string
   $updatedAt: string
+}
+
+// Academic Record interface for marksheet data
+export interface AcademicRecord {
+  $id: string
+  userId: string
+  fileId: string
+  extractedData: string // JSON string of the full extracted data
+  institution?: string
+  registerNumber?: string
+  studentName?: string
+  dateOfBirth?: string
+  department?: string
+  batch?: string
+  academicYear?: string
+  semester?: string
+  computedCgpa?: string
+  totalCreditsEarned?: string
+  totalCreditsRegistered?: string
+  createdAt: string
+  updatedAt: string
 } 

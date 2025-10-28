@@ -1,6 +1,6 @@
 import { databases, storage, config } from './appwrite'
 import { ID, Query } from 'appwrite'
-import type { Job, Application, UserProfile, Placement, AdminRole, ApplicationWithUserData } from './appwrite'
+import type { Job, Application, UserProfile, Placement, AdminRole, ApplicationWithUserData, AcademicRecord } from './appwrite'
 
 export class DatabaseService {
   // Helper function to convert departments array to string for storage
@@ -750,6 +750,79 @@ export class DatabaseService {
     } catch (error: any) {
       console.error('Error deleting admin role:', error)
       throw new Error(error.message || 'Failed to delete admin role')
+    }
+  }
+
+  // Academic Records Management
+  static async upsertAcademicRecord(userId: string, record: any) {
+    try {
+      const collectionId = config.collections.academicRecords
+      
+      // Try to find existing record for user
+      const list = await databases.listDocuments(
+        config.databaseId,
+        collectionId,
+        [Query.equal('userId', userId), Query.limit(1)]
+      )
+      
+      const timestamp = new Date().toISOString()
+      
+      if (list.documents && list.documents.length > 0) {
+        const existing = list.documents[0]
+        const updated = await databases.updateDocument(
+          config.databaseId,
+          collectionId,
+          existing.$id,
+          { ...record, updatedAt: timestamp }
+        )
+        return { success: true, data: updated }
+      } else {
+        const created = await databases.createDocument(
+          config.databaseId,
+          collectionId,
+          ID.unique(),
+          { userId, ...record, createdAt: timestamp, updatedAt: timestamp }
+        )
+        return { success: true, data: created }
+      }
+    } catch (error: any) {
+      console.error('upsertAcademicRecord error:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  static async getAcademicRecord(userId: string) {
+    try {
+      const collectionId = config.collections.academicRecords
+      const list = await databases.listDocuments(
+        config.databaseId,
+        collectionId,
+        [Query.equal('userId', userId), Query.limit(1)]
+      )
+      
+      if (list.documents && list.documents.length > 0) {
+        return { success: true, data: list.documents[0] }
+      }
+      return { success: false, error: 'No academic record found' }
+    } catch (error: any) {
+      console.error('getAcademicRecord error:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  // File upload helper
+  static async uploadFile(file: File, bucketId?: string) {
+    try {
+      const bucket = bucketId || config.storageId
+      const result = await storage.createFile(
+        bucket,
+        ID.unique(),
+        file
+      )
+      return result
+    } catch (error: any) {
+      console.error('Error uploading file:', error)
+      throw new Error(error.message || 'Failed to upload file')
     }
   }
 } 

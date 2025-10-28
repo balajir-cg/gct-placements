@@ -1,0 +1,81 @@
+{
+  "description": "Sample expected response from Qwen 2.5 Vision Model for marksheet extraction",
+  "sample_response": {
+    "institution": "GOVERNMENT COLLEGE OF TECHNOLOGY",
+    "affiliation": "Anna University, Chennai",
+    "location": "Coimbatore - 641 013, Tamil Nadu, India",
+    "statement_type": "STATEMENT OF GRADES (RELATIVE GRADING SYSTEM)",
+    "si_no": "00358",
+    "student_details": {
+      "register_no": "71772217115",
+      "name": "GANESH D",
+      "date_of_birth": "29/11/2004",
+      "gender": "MALE",
+      "programme_branch": "FT B.E. COMPUTER SCIENCE AND ENGINEERING",
+      "month_year_of_examinations": "MARCH 2023",
+      "regulations": "2022"
+    },
+    "courses": [
+      {
+        "sem": "I",
+        "course_code": "22SHS1Z1",
+        "course_title": "HERITAGE OF TAMILS",
+        "credits": 1,
+        "letter_grade": "B+",
+        "grade_point": 7,
+        "attendance_grade": "M",
+        "result": "PASS"
+      },
+      {
+        "sem": "I",
+        "course_code": "22SHS1Z2",
+        "course_title": "PROFESSIONAL ENGLISH",
+        "credits": 3,
+        "letter_grade": "B+",
+        "grade_point": 7,
+        "attendance_grade": "G",
+        "result": "PASS"
+      },
+      {
+        "sem": "I",
+        "course_code": "22SBS1Z1",
+        "course_title": "LINEAR ALGEBRA AND CALCULUS",
+        "credits": 4,
+        "letter_grade": "U",
+        "grade_point": 0,
+        "attendance_grade": "G",
+        "result": "RA"
+      }
+    ],
+    "summary": {
+      "credits_registered": 19.5,
+      "credits_earned": 15.5,
+      "weighted_grade_points_earned": 109.0,
+      "grade_point_average": 5.59,
+      "cumulative_credits_earned": "15.5 / 19.5",
+      "cumulative_grade_point_average": 5.59
+    },
+    "footer": {
+      "medium_of_instruction": "ENGLISH",
+      "seal_and_date": "14 NOV 2023",
+      "controller_of_examinations": "Dr. R. THENMOZHI"
+    }
+  },
+  "cgpa_calculation": {
+    "method": "weighted_grade_points",
+    "formula": "CGPA = weighted_grade_points_earned / credits_registered",
+    "example": "109.0 / 19.5 = 5.59 (rounded to 2 decimals)",
+    "note": "Uses credits_registered (not credits_earned) to match actual CGPA calculation",
+    "alternative_calculation": {
+      "description": "If summary not available, calculate from courses",
+      "formula": "CGPA = Σ(credits × grade_point) / Σ(all_credits_including_failed)",
+      "example": "Course 1: 1 × 7 = 7, Course 2: 3 × 7 = 21, Failed: 4 × 0 = 0, Total: 28 / 8 = 3.50"
+    }
+  },
+  "notes": [
+    "The weighted_grade_points_earned field in summary is the most accurate",
+    "CGPA is calculated using credits_registered (total registered) not credits_earned (passed only)",
+    "Failed courses (grade_point = 0) are included in total credits but not in weighted points",
+    "The system prioritizes: 1) cumulative_grade_point_average, 2) weighted calculation, 3) course-by-course calculation"
+  ]
+}

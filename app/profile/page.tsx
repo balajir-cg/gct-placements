@@ -40,6 +40,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import { DatabaseService } from "@/lib/database"
 import { StudentRoute } from "@/components/ProtectedRoute"
 import { UserRole } from "@/lib/appwrite"
+import MarksheetUploadSection from "@/components/MarksheetUploadSection"
 
 function ProfilePageContent() {
   const { user } = useAuth()
@@ -87,6 +88,8 @@ function ProfilePageContent() {
     historyOfArrear: "No",
     activeBacklog: "No",
     noOfBacklogs: "0",
+    historyOfArrearsCount: "0",
+    currentArrearsCount: "0",
     // Files and Profiles
     profilePicture: "",
     resume: "",
@@ -150,6 +153,8 @@ function ProfilePageContent() {
         historyOfArrear: user.profile.historyOfArrear || "No",
         activeBacklog: user.profile.activeBacklog || "No",
         noOfBacklogs: user.profile.noOfBacklogs || "0",
+        historyOfArrearsCount: user.profile.historyOfArrearsCount || "0",
+        currentArrearsCount: user.profile.currentArrearsCount || "0",
         // Files and Profiles
         profilePicture: user.profile.profilePicture || "",
         resume: user.profile.resume || "",
@@ -158,6 +163,92 @@ function ProfilePageContent() {
       })
     }
   }, [user])
+
+  const handleMarksheetDataExtracted = (marksheetData: any, rawData: any) => {
+    // Validate that marksheet belongs to the current student
+    const extractedRegNo = marksheetData.registerNumber?.trim().toUpperCase()
+    const currentRegNo = profileData.rollNo?.trim().toUpperCase()
+
+    // Check if register numbers match (if rollNo is already set)
+    if (currentRegNo && extractedRegNo && extractedRegNo !== currentRegNo) {
+      setMessage({
+        type: 'error',
+        text: `Marksheet mismatch! This marksheet belongs to ${extractedRegNo}, but you are ${currentRegNo}. Please upload your own marksheet.`
+      })
+      return
+    }
+
+    // Validate semester number
+    const semesterNum = parseInt(marksheetData.semester)
+    if (!semesterNum || semesterNum < 1 || semesterNum > 8) {
+      setMessage({
+        type: 'error',
+        text: `Invalid semester number: ${marksheetData.semester}. Expected a value between 1 and 8.`
+      })
+      return
+    }
+
+    // Update profile data with extracted marksheet information
+    setProfileData(prev => {
+      // Find the highest semester with CGPA data to determine currentCgpa
+      const semesterCgpas = [
+        { sem: 1, cgpa: prev.sem1Cgpa },
+        { sem: 2, cgpa: prev.sem2Cgpa },
+        { sem: 3, cgpa: prev.sem3Cgpa },
+        { sem: 4, cgpa: prev.sem4Cgpa },
+        { sem: 5, cgpa: prev.sem5Cgpa },
+        { sem: 6, cgpa: prev.sem6Cgpa },
+        { sem: 7, cgpa: prev.sem7Cgpa },
+        { sem: 8, cgpa: prev.sem8Cgpa },
+      ]
+
+      // Add the new semester CGPA to the list
+      const semesterKey = `sem${semesterNum}Cgpa` as keyof typeof prev
+      semesterCgpas[semesterNum - 1].cgpa = marksheetData.computedCgpa || (prev[semesterKey] as string)
+
+      // Find the highest semester with non-empty CGPA
+      const highestSemester = semesterCgpas
+        .filter(s => s.cgpa && s.cgpa !== '' && s.cgpa !== '0' && s.cgpa !== '0.00')
+        .sort((a, b) => b.sem - a.sem)[0]
+
+      // Use the CGPA from the highest semester as currentCgpa
+      const newCurrentCgpa = highestSemester?.cgpa || marksheetData.computedCgpa || prev.currentCgpa
+
+      const updates: any = {
+        ...prev,
+        // Only update rollNo if it's empty or matches
+        rollNo: extractedRegNo || prev.rollNo,
+        batch: marksheetData.batch || prev.batch,
+        department: marksheetData.department || prev.department,
+        dateOfBirth: marksheetData.dateOfBirth || prev.dateOfBirth,
+        
+        // Update current CGPA to the highest semester's CGPA
+        currentCgpa: newCurrentCgpa,
+        
+        // Update arrear counts (these should reflect the latest uploaded marksheet)
+        historyOfArrearsCount: marksheetData.historyOfArrearsCount?.toString() || "0",
+        currentArrearsCount: marksheetData.currentArrearsCount?.toString() || "0",
+        historyOfArrear: marksheetData.historyOfArrearsCount > 0 ? "Yes" : "No",
+        activeBacklog: marksheetData.currentArrearsCount > 0 ? "Yes" : "No",
+        noOfBacklogs: marksheetData.currentArrearsCount?.toString() || "0",
+      }
+
+      // Update the specific semester CGPA based on semester number
+      updates[semesterKey] = marksheetData.computedCgpa || (prev[semesterKey] as string)
+
+      return updates
+    })
+
+    setMessage({
+      type: 'success',
+      text: `✅ Marksheet validated! Semester ${semesterNum} CGPA: ${marksheetData.computedCgpa}. Student: ${marksheetData.studentName} (${extractedRegNo}). Review and click "Save Changes" to update your profile.`
+    })
+
+    // Enable editing mode if not already
+    if (!isEditing) {
+      setIsEditing(true)
+    }
+  }
 
   const handleSave = async () => {
     if (!user) return
@@ -848,13 +939,60 @@ function ProfilePageContent() {
                     />
                   </div>
                 </div>
+
+                {/* College Academic Details (from Marksheet) */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Label className="text-base font-medium">College Academic Details</Label>
+                    <Badge variant="outline" className="text-xs">From Marksheet</Badge>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="historyOfArrearsCount">Total Arrears Ever Had</Label>
+                      <Input
+                        id="historyOfArrearsCount"
+                        value={profileData.historyOfArrearsCount}
+                        onChange={(e) => setProfileData({ ...profileData, historyOfArrearsCount: e.target.value })}
+                        disabled={!isEditing}
+                        placeholder="0"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Total number of arrears you've had throughout your academic journey (never decreases)
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="currentArrearsCount">Current Active Arrears</Label>
+                      <Input
+                        id="currentArrearsCount"
+                        value={profileData.currentArrearsCount}
+                        onChange={(e) => setProfileData({ ...profileData, currentArrearsCount: e.target.value })}
+                        disabled={!isEditing}
+                        placeholder="0"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Number of arrears you currently have (decreases when cleared)
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Files & Links */}
           <TabsContent value="files">
-            <Card>
+            <div className="space-y-6">
+              {/* Marksheet Upload Section */}
+              {user && (
+                <MarksheetUploadSection
+                  userId={user.$id}
+                  currentRollNo={profileData.rollNo}
+                  onDataExtracted={handleMarksheetDataExtracted}
+                  disabled={isSaving || isUploading}
+                />
+              )}
+
+              <Card>
               <CardHeader>
                 <CardTitle>Files & Social Profiles</CardTitle>
                 <CardDescription>
@@ -971,6 +1109,7 @@ function ProfilePageContent() {
                 </div>
               </CardContent>
             </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
