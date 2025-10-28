@@ -36,7 +36,7 @@ updatedAt               (50, required)
 Already configured ✅:
 ```env
 NEXT_PUBLIC_APPWRITE_ACADEMIC_RECORDS_COLLECTION_ID=academic_records
-OPENROUTER_API_KEY=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
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 VISION_MODEL=qwen/qwen2.5-vl-32b-instruct:free
 ```
 

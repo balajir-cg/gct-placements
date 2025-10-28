@@ -26,13 +26,39 @@ A comprehensive, modern placement management system for Government College of Te
 ### 👥 **User Management System**
 - **Comprehensive Student Profiles**:
   - Personal information (name, email, phone, DOB, gender, address)
-  - Academic records (10th, 12th, diploma, CGPA, backlogs)
+  - Academic records (10th, 12th, diploma, semester-wise CGPA, backlogs)
+  - **AI-Powered Marksheet Upload**: Automatically extract academic data
   - Professional details (skills, projects, internships)
   - Documents (resume, profile picture, certificates)
+- **Intelligent Arrear Tracking**:
+  - History of Arrears: Total arrears ever had (never decreases)
+  - Current Arrears: Active arrears (decreases when cleared)
+  - Auto-calculated from marksheet uploads
 - **Profile Completion Tracking**: Real-time progress indicator
 - **Admin Management**: Dedicated interface for managing admin roles
 - **User Search & Filter**: Advanced search across all user attributes
 - **Bulk Operations**: Export user data, bulk status updates
+
+### 📄 **AI-Powered Marksheet Processing** (NEW!)
+- **Smart Marksheet Upload**:
+  - Upload semester marksheet images (JPEG, PNG, WebP)
+  - AI extraction using OpenRouter Qwen 2.5 VL 32B vision model
+  - Automatic data extraction: Student details, CGPA, courses, grades
+  - Roman numeral semester support (V, VI, VII, VIII → 5, 6, 7, 8)
+- **Review & Edit Before Save**:
+  - Preview extracted data in user-friendly format
+  - Edit any field before applying to profile
+  - Real-time validation (register number matching, semester range)
+- **Intelligent Academic Tracking**:
+  - Semester-wise CGPA storage (sem1Cgpa to sem8Cgpa)
+  - Current CGPA based on highest semester uploaded
+  - Automatic arrear detection and tracking
+  - Arrear clearance detection (failed → passed in later semester)
+- **Data Validation**:
+  - Verify marksheet belongs to correct student
+  - Prevent uploading others' marksheets
+  - Semester number validation (1-8)
+  - CGPA range validation (0-10)
 
 ### 💼 **Job Management System**
 - **Detailed Job Postings**:
@@ -141,6 +167,8 @@ A comprehensive, modern placement management system for Government College of Te
 | ↳ Authentication | User authentication and session management |
 | ↳ Storage | File storage with CDN delivery |
 | ↳ Realtime | WebSocket-based real-time updates |
+| **OpenRouter** | AI API gateway for marksheet processing |
+| ↳ Qwen 2.5 VL 32B | Vision model for OCR and data extraction |
 
 ### **Core Libraries**
 - **date-fns**: Date formatting and manipulation
@@ -554,7 +582,7 @@ Create a `.env.local` file in the root directory:
 cp .env.example .env.local
 ```
 
-Update `.env.local` with your Appwrite credentials:
+Update `.env.local` with your credentials:
 
 ```env
 # Appwrite Configuration
@@ -578,9 +606,15 @@ NEXT_PUBLIC_APPWRITE_FORUM_COMMENTS_COLLECTION_ID=forum_comments
 # Domain Configuration
 NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN=gct.ac.in
 
+# OpenRouter API (for AI Marksheet Processing)
+# Get your API key from https://openrouter.ai/
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+
 # Optional: Self-hosted Appwrite
 # NEXT_PUBLIC_APPWRITE_ENDPOINT=http://localhost/v1
 ```
+
+> **⚠️ Security Note**: Never commit `.env.local` to version control. The `.env.local` file is automatically gitignored. Always use placeholders in documentation and never expose API keys in committed files.
 
 #### 4. Appwrite Setup
 
@@ -769,6 +803,70 @@ gct-placements/
 └── 📄 ADMIN_DASHBOARD_IMPROVEMENTS.md # Admin dashboard docs
 
 ```
+
+---
+
+## 📖 Usage Guide
+
+### 🎓 For Students: Uploading Marksheets
+
+The AI-powered marksheet upload feature automatically extracts academic data from your semester marksheets.
+
+#### Step-by-Step Instructions:
+
+1. **Navigate to Profile**:
+   - Log in to your student account
+   - Go to **Profile** → **Files & Links** tab
+   - Scroll to the **Marksheet Upload** section
+
+2. **Upload Your Marksheet**:
+   - Click **Upload Marksheet Image**
+   - Select a clear image of your semester marksheet (JPEG, PNG, or WebP)
+   - Supported formats: `.jpg`, `.jpeg`, `.png`, `.webp` (max 10MB)
+   - Wait for AI extraction (typically 5-15 seconds)
+
+3. **Review Extracted Data**:
+   - The AI will extract:
+     - Student Register Number
+     - Student Name
+     - Semester Number (supports Roman numerals: V, VI, VII, VIII)
+     - CGPA (Cumulative Grade Point Average)
+     - Course details (name, code, credits, grade, attempts)
+   - Preview shows all extracted information
+
+4. **Edit if Needed**:
+   - Click **✏️ Edit** button
+   - Correct any misread values
+   - Click **Save** when done
+
+5. **Apply to Profile**:
+   - Click **Apply to Profile**
+   - System validates:
+     - ✅ Register number matches your profile
+     - ✅ Semester is between 1-8
+     - ✅ CGPA is between 0-10
+   - Your profile updates automatically with:
+     - Semester-wise CGPA (e.g., `sem5Cgpa: 8.75`)
+     - Current CGPA (from highest semester uploaded)
+     - Arrear counts (history and current)
+
+#### 🎯 Smart Features:
+
+- **Arrear Detection**: Automatically identifies failed courses (grades like RA, SA, U, F)
+- **Arrear Clearance**: Detects when you clear a course in a later semester (attempts > 1)
+- **History vs Current Arrears**:
+  - **History of Arrears**: Total arrears you've ever had (never decreases)
+  - **Current Arrears**: Active arrears (decreases when cleared)
+- **CGPA Tracking**: Updates your current CGPA based on the highest semester uploaded
+- **Security**: Prevents uploading someone else's marksheet by validating register number
+
+#### 💡 Tips:
+
+- Upload marksheets in order (Semester 1, 2, 3...)
+- Ensure images are clear and well-lit
+- All text should be readable
+- Avoid shadows or glare on the marksheet
+- If AI misreads data, use the Edit button to correct it
 
 ---
 
