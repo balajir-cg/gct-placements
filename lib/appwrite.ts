@@ -30,6 +30,7 @@ export const config = {
     forumPosts: process.env.NEXT_PUBLIC_APPWRITE_FORUM_POSTS_COLLECTION_ID || 'forum_posts',
     forumComments: process.env.NEXT_PUBLIC_APPWRITE_FORUM_COMMENTS_COLLECTION_ID || 'forum_comments',
     academicRecords: process.env.NEXT_PUBLIC_APPWRITE_ACADEMIC_RECORDS_COLLECTION_ID || 'academic_records',
+    notifications: process.env.NEXT_PUBLIC_APPWRITE_NOTIFICATIONS_COLLECTION_ID || 'notifications',
   },
   allowedEmailDomain: process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN || 'gct.ac.in'
 }
@@ -284,4 +285,19 @@ export interface AcademicRecord {
   totalCreditsRegistered?: string
   createdAt: string
   updatedAt: string
+}
+
+// Notification interface
+export interface Notification {
+  $id: string
+  userId: string
+  title: string
+  message: string
+  type: 'new_job' | 'deadline_reminder' | 'placement_update' | 'application_update'
+  jobId?: string
+  read: boolean
+  createdAt: string
+  readAt?: string
+  $createdAt?: string
+  $updatedAt?: string
 } 

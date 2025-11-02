@@ -80,20 +80,50 @@ export class DatabaseService {
     }
   }
 
+  // Alias for getJob (for consistency)
+  static async getJobById(jobId: string) {
+    return this.getJob(jobId)
+  }
+
   static async updateJob(jobId: string, updates: Omit<Partial<Job>, '$id' | 'createdAt'>) {
     try {
+      // Convert departments array to string if present
+      const updateData: any = { ...updates }
+      if (updates.departments && Array.isArray(updates.departments)) {
+        updateData.departments = this.departmentsToString(updates.departments)
+      }
+      
       const job = await databases.updateDocument(
         config.databaseId,
         config.collections.jobs,
         jobId,
         {
-          ...updates,
+          ...updateData,
           updatedAt: new Date().toISOString(),
         }
       )
-      return job as unknown as Job
+      const result = job as unknown as any
+      // Convert departments back to array for the returned object
+      return {
+        ...result,
+        departments: this.departmentsToArray(result.departments || '')
+      } as Job
     } catch (error) {
       console.error('Error updating job:', error)
+      throw error
+    }
+  }
+
+  static async deleteJob(jobId: string) {
+    try {
+      await databases.deleteDocument(
+        config.databaseId,
+        config.collections.jobs,
+        jobId
+      )
+      return { success: true }
+    } catch (error) {
+      console.error('Error deleting job:', error)
       throw error
     }
   }

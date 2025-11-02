@@ -1,0 +1,13 @@
+{
+  "name": "send-job-notification",
+  "version": "1.0.0",
+  "description": "Send notifications to all students when a new job is posted",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "node-appwrite": "^13.0.0"
+  }
+}

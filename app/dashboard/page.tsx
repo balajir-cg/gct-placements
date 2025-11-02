@@ -26,6 +26,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import { DatabaseService } from "@/lib/database"
 import { Job } from "@/lib/appwrite"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { NotificationBell } from "@/components/NotificationBell"
 
 export default function StudentDashboard() {
   const { user, logout, isAuthenticated, isPlacementRep, isAdmin, refreshUser } = useAuth()
@@ -235,6 +236,8 @@ export default function StudentDashboard() {
                     <span className="ml-1 sm:ml-2">Forum</span>
                   </Button>
                 </Link>
+                
+                <NotificationBell />
                 
                 <Link href="/profile">
                   <Button variant="ghost" size="sm">

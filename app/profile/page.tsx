@@ -218,8 +218,7 @@ function ProfilePageContent() {
         ...prev,
         // Only update rollNo if it's empty or matches
         rollNo: extractedRegNo || prev.rollNo,
-        batch: marksheetData.batch || prev.batch,
-        department: marksheetData.department || prev.department,
+        // batch and department should NOT be updated from marksheet - user sets these manually
         dateOfBirth: marksheetData.dateOfBirth || prev.dateOfBirth,
         
         // Update current CGPA to the highest semester's CGPA

@@ -91,21 +91,20 @@ export async function POST(request: NextRequest) {
       if (userList.documents && userList.documents.length > 0) {
         const userProfile = userList.documents[0]
         
-        // Update profile with academic data from marksheet
+        // Update profile with academic data from marksheet (excluding batch and department)
         await databases.updateDocument(
           config.databaseId,
           config.collections.users,
           userProfile.$id,
           {
             rollNo: academicInfo.registerNumber || userProfile.rollNo,
-            batch: academicInfo.batch || userProfile.batch,
-            department: academicInfo.department || userProfile.department,
+            // batch and department should be set manually by user, not from marksheet
             currentCgpa: academicInfo.computedCgpa || userProfile.currentCgpa,
             dateOfBirth: academicInfo.dateOfBirth || userProfile.dateOfBirth,
             updatedAt: timestamp
           }
         )
-        console.log('Updated user profile with academic data')
+        console.log('Updated user profile with academic data (batch and department unchanged)')
       }
     } catch (profileError: any) {
       console.error('Failed to update user profile:', profileError)

@@ -296,7 +296,7 @@ export default function AdminDashboard() {
               <CardDescription>Quick access to admin operations</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Link href="/admin/add-job">
                   <Button variant="outline" className="w-full h-auto p-4 justify-start">
                     <div className="flex items-center gap-3">
@@ -304,6 +304,18 @@ export default function AdminDashboard() {
                       <div className="text-left">
                         <div className="font-medium">Add Job</div>
                         <div className="text-sm text-gray-600">Post new job openings</div>
+                      </div>
+                    </div>
+                  </Button>
+                </Link>
+
+                <Link href="/admin/jobs">
+                  <Button variant="outline" className="w-full h-auto p-4 justify-start">
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="w-5 h-5 text-indigo-600" />
+                      <div className="text-left">
+                        <div className="font-medium">Manage Jobs</div>
+                        <div className="text-sm text-gray-600">View, edit, and delete jobs</div>
                       </div>
                     </div>
                   </Button>
@@ -326,7 +338,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-3">
                       <Eye className="w-5 h-5 text-purple-600" />
                       <div className="text-left">
-                        <div className="font-medium">View</div>
+                        <div className="font-medium">View Placements</div>
                         <div className="text-sm text-gray-600">See all placement records</div>
                       </div>
                     </div>

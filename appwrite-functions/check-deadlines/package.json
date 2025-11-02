@@ -1,0 +1,13 @@
+{
+  "name": "check-deadlines",
+  "version": "1.0.0",
+  "description": "Check job deadlines and send reminders to students",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "node-appwrite": "^13.0.0"
+  }
+}

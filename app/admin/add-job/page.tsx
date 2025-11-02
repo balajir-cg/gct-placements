@@ -127,9 +127,31 @@ function AddJobPageContent() {
 
       const result = await DatabaseService.createJob(jobData)
 
+      // Send notifications to all students about the new job
+      try {
+        const notificationResponse = await fetch('/api/notifications/send-job-notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            jobId: result.$id,
+            jobTitle: formData.title,
+            companyName: formData.company,
+            applicationDeadline: formData.applicationDeadline,
+          }),
+        });
+
+        const notificationResult = await notificationResponse.json();
+        console.log('Notification result:', notificationResult);
+      } catch (notifError) {
+        console.error('Failed to send notifications:', notifError);
+        // Don't fail the job creation if notifications fail
+      }
+
       setMessage({
         type: "success",
-        text: "Job posting created successfully!",
+        text: "Job posting created successfully and notifications sent to all students!",
       })
 
       // Reset form or redirect after successful submission
