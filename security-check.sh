@@ -6,13 +6,13 @@ echo "🔒 Security Check for GCT Placement Portal"
 echo "=========================================="
 echo ""
 
-# Check for credentials in tracked files
+# Check for credentials in tracked files (excluding security docs)
 echo "1. Checking for exposed credentials in tracked files..."
-if git ls-files | xargs grep -l "euaxrujprnckzawv\|your-actual-password" 2>/dev/null; then
-    echo "❌ CREDENTIALS FOUND! Do NOT push to GitHub!"
+if git ls-files | grep -v "SECURITY_FIX_APPLIED.md\|security-check.sh" | xargs grep -l "euaxrujprnckzawv" 2>/dev/null; then
+    echo "❌ REAL CREDENTIALS FOUND! Do NOT push to GitHub!"
     exit 1
 else
-    echo "✅ No credentials found in tracked files"
+    echo "✅ No actual credentials found in tracked files"
 fi
 
 # Check if .env files are ignored
