@@ -118,9 +118,9 @@ app/api/notifications/
 .env.local
 ├── SMTP_HOST=smtp.gmail.com
 ├── SMTP_PORT=587
-├── SMTP_USER=your user name
-├── SMTP_PASSWORD= (Gmail App Password)
-├── SMTP_FROM_EMAIL=your email 
+├── SMTP_USER=your-email@gmail.com
+├── SMTP_PASSWORD=your-gmail-app-password
+├── SMTP_FROM_EMAIL=your-email@gmail.com
 └── SMTP_FROM_NAME=GCT Placement Portal
 ```
 
@@ -244,7 +244,7 @@ const studentEmail = student.collegeEmail || student.personalEmail;
 
 **Check 2: Spam Folder**
 - Ask students to check spam/junk folders
-- Whitelist: balaji989412@gmail.com
+- Whitelist the sender email address
 
 **Check 3: API Logs**
 ```bash
