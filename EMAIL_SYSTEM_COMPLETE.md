@@ -118,9 +118,9 @@ app/api/notifications/
 .env.local
 ├── SMTP_HOST=smtp.gmail.com
 ├── SMTP_PORT=587
-├── SMTP_USER=balaji989412@gmail.com
-├── SMTP_PASSWORD=euaxrujprnckzawv (Gmail App Password)
-├── SMTP_FROM_EMAIL=balaji989412@gmail.com
+├── SMTP_USER=your user name
+├── SMTP_PASSWORD= (Gmail App Password)
+├── SMTP_FROM_EMAIL=your email 
 └── SMTP_FROM_NAME=GCT Placement Portal
 ```
 
