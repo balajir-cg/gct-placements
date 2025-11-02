@@ -155,6 +155,114 @@ Important:
       }
     }
 
+    // 🔒 FRAUD DETECTION: Validate marksheet authenticity
+    const fraudChecks: { check: string; passed: boolean; reason?: string }[] = []
+    
+    // 1. Check for GCT institution name
+    const institutionCheck = extractedData.institution?.toLowerCase().includes('government college of technology') ||
+                            extractedData.institution?.toLowerCase().includes('gct')
+    fraudChecks.push({
+      check: 'Institution Name',
+      passed: institutionCheck,
+      reason: institutionCheck ? undefined : `Invalid institution: "${extractedData.institution}". Expected "Government College of Technology"`
+    })
+    
+    // 2. Check for Coimbatore location
+    const locationCheck = extractedData.location?.toLowerCase().includes('coimbatore') ||
+                         extractedData.location?.toLowerCase().includes('641')
+    fraudChecks.push({
+      check: 'Location',
+      passed: locationCheck,
+      reason: locationCheck ? undefined : `Invalid location: "${extractedData.location}". Expected Coimbatore location`
+    })
+    
+    // 3. Check for "Statement of Grades" document type
+    const documentTypeCheck = extractedData.statement_type?.toLowerCase().includes('statement of grades') ||
+                             extractedData.statement_type?.toLowerCase().includes('grade')
+    fraudChecks.push({
+      check: 'Document Type',
+      passed: documentTypeCheck,
+      reason: documentTypeCheck ? undefined : `Invalid document type: "${extractedData.statement_type}". Expected "Statement of Grades"`
+    })
+    
+    // 4. Validate register number format (should be numeric, typically 12 digits for GCT)
+    const registerNo = extractedData.student_details?.register_no || ''
+    const registerNumberCheck = /^\d{10,15}$/.test(registerNo.replace(/\s/g, ''))
+    fraudChecks.push({
+      check: 'Register Number Format',
+      passed: registerNumberCheck,
+      reason: registerNumberCheck ? undefined : `Invalid register number format: "${registerNo}". Expected 10-15 digit numeric format`
+    })
+    
+    // 5. Check for required footer elements (seal, controller signature)
+    const footerCheck = extractedData.footer && (
+      extractedData.footer.seal_and_date || 
+      extractedData.footer.controller_of_examinations
+    )
+    fraudChecks.push({
+      check: 'Official Footer Elements',
+      passed: !!footerCheck,
+      reason: footerCheck ? undefined : 'Missing official seal/date or Controller of Examinations signature'
+    })
+    
+    // 6. Validate course structure (must have courses with proper format)
+    const coursesCheck = Array.isArray(extractedData.courses) && 
+                        extractedData.courses.length > 0 &&
+                        extractedData.courses.every((c: any) => 
+                          c.course_code && c.course_title && c.letter_grade
+                        )
+    fraudChecks.push({
+      check: 'Course Data Structure',
+      passed: coursesCheck,
+      reason: coursesCheck ? undefined : 'Invalid or missing course data structure'
+    })
+    
+    // 7. Check for summary/CGPA calculation section
+    const summaryCheck = extractedData.summary && (
+      extractedData.summary.cumulative_grade_point_average !== undefined ||
+      (extractedData.summary.credits_registered && extractedData.summary.weighted_grade_points_earned)
+    )
+    fraudChecks.push({
+      check: 'CGPA Summary Section',
+      passed: !!summaryCheck,
+      reason: summaryCheck ? undefined : 'Missing CGPA/summary calculation section'
+    })
+
+    // Count failed checks
+    const failedChecks = fraudChecks.filter(c => !c.passed)
+    const fraudScore = (failedChecks.length / fraudChecks.length) * 100
+    
+    // If more than 40% checks fail, reject as potential fraud
+    const isSuspiciousFraud = fraudScore > 40
+    
+    if (isSuspiciousFraud) {
+      console.warn('⚠️ POTENTIAL FRAUD DETECTED:', {
+        fraudScore: `${fraudScore.toFixed(1)}%`,
+        failedChecks: failedChecks.map(c => ({ check: c.check, reason: c.reason }))
+      })
+      
+      return NextResponse.json({
+        success: false,
+        fraud_detected: true,
+        fraud_score: fraudScore,
+        message: '⚠️ This document appears suspicious and does not match the official GCT marksheet format.',
+        failed_checks: failedChecks.map(c => c.reason),
+        all_checks: fraudChecks,
+        suggestion: 'Please upload an official Government College of Technology marksheet.'
+      }, { status: 400 })
+    }
+    
+    // Log warning if some checks failed but not critical
+    if (failedChecks.length > 0) {
+      console.warn('⚠️ Some authenticity checks failed:', failedChecks.map(c => c.check))
+    }
+    
+    console.log('✅ Authenticity checks passed:', {
+      passedChecks: fraudChecks.filter(c => c.passed).length,
+      totalChecks: fraudChecks.length,
+      fraudScore: `${fraudScore.toFixed(1)}%`
+    })
+
     // Calculate CGPA
     let computedCgpa = '0.00'
     
@@ -229,6 +337,13 @@ Important:
     return NextResponse.json({
       success: true,
       message: 'Marksheet extracted successfully',
+      authenticity_checks: {
+        fraud_score: fraudScore,
+        passed_checks: fraudChecks.filter(c => c.passed).length,
+        total_checks: fraudChecks.length,
+        failed_checks: failedChecks.length > 0 ? failedChecks.map(c => c.check) : [],
+        warnings: failedChecks.length > 0 ? 'Some authenticity checks failed. Please verify the marksheet.' : undefined
+      },
       data: {
         fileId,
         extractedData,

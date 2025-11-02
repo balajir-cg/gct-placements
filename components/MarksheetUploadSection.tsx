@@ -46,6 +46,7 @@ export default function MarksheetUploadSection({ userId, currentRollNo, onDataEx
   const [fileId, setFileId] = useState<string | null>(null)
   const [showFullData, setShowFullData] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [authenticityChecks, setAuthenticityChecks] = useState<any>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -157,6 +158,19 @@ export default function MarksheetUploadSection({ userId, currentRollNo, onDataEx
       const result = await extractResp.json()
 
       if (!result.success) {
+        // Check if it's a fraud detection error
+        if (result.fraud_detected) {
+          setMessage({
+            type: 'error',
+            text: `🚨 FRAUD ALERT: ${result.message}\n\nFailed checks:\n${result.failed_checks.join('\n')}\n\nFraud Score: ${result.fraud_score.toFixed(1)}%`
+          })
+          setUploadProgress(0)
+          setFile(null)
+          const fileInput = document.getElementById('marksheet-input') as HTMLInputElement
+          if (fileInput) fileInput.value = ''
+          setIsUploading(false)
+          return
+        }
         throw new Error(result.error || 'Failed to extract marksheet data')
       }
 
@@ -164,6 +178,13 @@ export default function MarksheetUploadSection({ userId, currentRollNo, onDataEx
       
       const extracted = result.data.extractedData
       setExtractedData(extracted)
+
+      // Check for authenticity warnings
+      const authenticityData = result.authenticity_checks
+      setAuthenticityChecks(authenticityData)
+      if (authenticityData && authenticityData.warnings) {
+        console.warn('⚠️ Authenticity warnings:', authenticityData)
+      }
 
       // Calculate arrears from courses
       const courses = extracted.courses || []
@@ -316,14 +337,31 @@ export default function MarksheetUploadSection({ userId, currentRollNo, onDataEx
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
                   <CheckCircle className="h-5 w-5 text-green-500" />
-                  Extracted Academic Information
-                </CardTitle>
+                  <CardTitle>Extracted Academic Information</CardTitle>
+                </div>
                 <CardDescription>
                   Review the extracted data before using it to fill your profile
                 </CardDescription>
+                {/* Authenticity Badge */}
+                {authenticityChecks && (
+                  <div className="mt-3 flex items-center gap-2">
+                    {authenticityChecks.failed_checks && authenticityChecks.failed_checks.length > 0 ? (
+                      <Badge variant="outline" className="border-yellow-600 text-yellow-700 bg-yellow-50">
+                        ⚠️ Partial Verification ({authenticityChecks.passed_checks}/{authenticityChecks.total_checks} checks passed)
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-green-600 text-green-700 bg-green-50">
+                        ✓ Verified GCT Marksheet ({authenticityChecks.passed_checks}/{authenticityChecks.total_checks} checks passed)
+                      </Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      Fraud Score: {authenticityChecks.fraud_score?.toFixed(1)}%
+                    </span>
+                  </div>
+                )}
               </div>
               {!isEditing && (
                 <Button

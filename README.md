@@ -45,6 +45,19 @@ A comprehensive, modern placement management system for Government College of Te
   - AI extraction using OpenRouter Qwen 2.5 VL 32B vision model
   - Automatic data extraction: Student details, CGPA, courses, grades
   - Roman numeral semester support (V, VI, VII, VIII → 5, 6, 7, 8)
+- **🔒 Fraud Detection & Document Verification**:
+  - **7-Point Authenticity Check System**:
+    1. ✅ Institution Name Verification (Government College of Technology)
+    2. ✅ Location Validation (Coimbatore - 641 013)
+    3. ✅ Document Type Check (Statement of Grades)
+    4. ✅ Register Number Format Validation (10-15 digit numeric)
+    5. ✅ Official Footer Elements (Seal, Date, Controller Signature)
+    6. ✅ Course Data Structure Validation
+    7. ✅ CGPA Summary Section Verification
+  - **Fraud Score Calculation**: Automatic rejection if >40% checks fail
+  - **Visual Authenticity Badges**: Green for verified, yellow for warnings
+  - **Prevents Fake Documents**: Detects manipulated or non-GCT marksheets
+  - **Real-time Alerts**: Immediate feedback on suspicious documents
 - **Review & Edit Before Save**:
   - Preview extracted data in user-friendly format
   - Edit any field before applying to profile
@@ -845,10 +858,36 @@ The AI-powered marksheet upload feature automatically extracts academic data fro
      - ✅ Register number matches your profile
      - ✅ Semester is between 1-8
      - ✅ CGPA is between 0-10
+     - ✅ **Fraud detection checks** (7-point authenticity verification)
    - Your profile updates automatically with:
      - Semester-wise CGPA (e.g., `sem5Cgpa: 8.75`)
      - Current CGPA (from highest semester uploaded)
      - Arrear counts (history and current)
+
+#### 🔒 Fraud Detection & Security:
+
+- **7-Point Authenticity Verification**:
+  1. Institution name must be "Government College of Technology"
+  2. Location must be "Coimbatore - 641 013"
+  3. Document type must be "Statement of Grades"
+  4. Register number must follow GCT format (10-15 digits)
+  5. Must have official seal and date
+  6. Must have Controller of Examinations signature
+  7. Must have proper course structure and CGPA calculation
+
+- **Automatic Fraud Detection**:
+  - ✅ **Green Badge**: Verified GCT marksheet (all checks passed)
+  - ⚠️ **Yellow Badge**: Partial verification (some checks failed)
+  - 🚨 **Red Alert**: Fraud detected (>40% checks failed) - **Upload Blocked**
+
+- **What Gets Blocked**:
+  - Marksheets from other institutions
+  - Handwritten or fake documents
+  - Screenshots without proper formatting
+  - Manipulated/edited marksheets
+  - Documents missing official elements
+
+- **Fraud Score Display**: Real-time percentage shown during validation
 
 #### 🎯 Smart Features:
 
@@ -862,11 +901,13 @@ The AI-powered marksheet upload feature automatically extracts academic data fro
 
 #### 💡 Tips:
 
+- **Only upload official GCT marksheets** - Other documents will be rejected
 - Upload marksheets in order (Semester 1, 2, 3...)
 - Ensure images are clear and well-lit
-- All text should be readable
+- All text should be readable (including seal, signature, and footer)
 - Avoid shadows or glare on the marksheet
 - If AI misreads data, use the Edit button to correct it
+- **Do not upload fake or manipulated documents** - The system will detect them
 
 ---
 
