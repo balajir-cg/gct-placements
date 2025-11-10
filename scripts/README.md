@@ -48,6 +48,98 @@ node scripts/seed-database.js
 
 **Features:**
 - ✅ Clears existing test data before seeding (optional)
+
+---
+
+### 3. **setup-arrears-collection.js** - Arrear Tracking Database Setup ⭐ NEW
+Creates the arrears collection for individual arrear paper tracking with proper clearance detection.
+
+**Usage:**
+```bash
+node scripts/setup-arrears-collection.js
+```
+
+**What it does:**
+- ✅ Creates `arrears` collection with comprehensive attributes
+- ✅ Tracks individual arrear papers (not just counts)
+- ✅ Records when courses are failed and when cleared
+- ✅ Sets up indexes for efficient queries (userId, courseCode, isCleared)
+- ✅ Enables accurate arrear history that never decreases
+
+**Why this is important:**
+- Fixes bug where `historyOfArrearsCount` was reset to 0 when arrears cleared
+- Properly handles multiple arrears (e.g., Math + Physics)
+- Tracks which specific courses need clearance
+- Maintains full audit trail of failures and clearances
+
+**See also:** `ARREAR_TRACKING_SYSTEM.md` for complete documentation
+
+---
+
+### 4. **view-arrears.js** - Arrear Records Viewer ⭐ NEW
+View all arrear records for a specific student (for debugging).
+
+**Usage:**
+```bash
+node scripts/view-arrears.js <userId>
+```
+
+**Example:**
+```bash
+node scripts/view-arrears.js 688f6dd3002c50df09df
+```
+
+**Output:**
+- 📊 Arrear summary (total, active, cleared counts)
+- 🔴 List of active (uncleared) arrears
+- ✅ List of cleared arrears with clearance details
+- 💡 Expected profile values for verification
+
+**Use cases:**
+- Debug arrear tracking issues
+- Verify which courses are marked as arrears
+- Check if clearance detection is working
+- Audit student arrear history
+
+---
+
+### 5. **cleanup-duplicate-arrears.js** - Duplicate Arrears Cleaner ⭐ NEW
+Finds and removes duplicate arrear records caused by slight variations in course codes or register numbers.
+
+**Usage:**
+```bash
+node scripts/cleanup-duplicate-arrears.js
+```
+
+**What it does:**
+- ✅ Scans all users for duplicate arrear records
+- ✅ Groups records by normalized course code (e.g., "CS 101" = "CS101" = "cs-101")
+- ✅ Keeps the oldest record, deletes duplicates
+- ✅ Provides detailed report of removed duplicates
+
+**When to use:**
+- After AI model extracted slightly different course codes
+- When register numbers had variations (e.g., "21CS001" vs "21CS 001")
+- If same course appears multiple times in database
+- Regular maintenance to keep database clean
+
+**Example output:**
+```
+👤 User: student@gct.ac.in
+   Total arrear records: 5
+   📝 Course CS101: 2 duplicate records
+      ✅ Keeping: CS 101 (older record)
+      ❌ Deleted: CS-101 (duplicate)
+   ✅ Removed 1/1 duplicates
+
+📊 CLEANUP SUMMARY
+Total users processed:      50
+Users with duplicates:      3
+Total duplicates found:     5
+Total duplicates removed:   5
+```
+
+---
 - ✅ Respects foreign key constraints
 - ✅ Creates realistic data with proper relationships
 - ✅ Handles errors gracefully

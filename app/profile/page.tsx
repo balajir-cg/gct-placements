@@ -214,6 +214,14 @@ function ProfilePageContent() {
       // Use the CGPA from the highest semester as currentCgpa
       const newCurrentCgpa = highestSemester?.cgpa || marksheetData.computedCgpa || prev.currentCgpa
 
+      // Arrear counts are now managed by the arrears collection
+      // These values come directly from processMarksheetArrears which:
+      // 1. Tracks individual arrear papers in the database
+      // 2. Marks them as cleared when passed in later semesters
+      // 3. Returns accurate counts of total history and current active arrears
+      const finalHistoryCount = marksheetData.historyOfArrearsCount || 0
+      const finalCurrentCount = marksheetData.currentArrearsCount || 0
+
       const updates: any = {
         ...prev,
         // Only update rollNo if it's empty or matches
@@ -224,12 +232,12 @@ function ProfilePageContent() {
         // Update current CGPA to the highest semester's CGPA
         currentCgpa: newCurrentCgpa,
         
-        // Update arrear counts (these should reflect the latest uploaded marksheet)
-        historyOfArrearsCount: marksheetData.historyOfArrearsCount?.toString() || "0",
-        currentArrearsCount: marksheetData.currentArrearsCount?.toString() || "0",
-        historyOfArrear: marksheetData.historyOfArrearsCount > 0 ? "Yes" : "No",
-        activeBacklog: marksheetData.currentArrearsCount > 0 ? "Yes" : "No",
-        noOfBacklogs: marksheetData.currentArrearsCount?.toString() || "0",
+        // Update arrear counts from the arrears tracking system
+        historyOfArrearsCount: finalHistoryCount.toString(),
+        currentArrearsCount: finalCurrentCount.toString(),
+        historyOfArrear: finalHistoryCount > 0 ? "Yes" : "No",
+        activeBacklog: finalCurrentCount > 0 ? "Yes" : "No",
+        noOfBacklogs: finalCurrentCount.toString(),
       }
 
       // Update the specific semester CGPA based on semester number

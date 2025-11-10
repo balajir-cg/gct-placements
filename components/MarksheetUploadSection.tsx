@@ -12,6 +12,7 @@ import { Loader2, Upload, FileText, CheckCircle, XCircle, Save, Eye, Edit } from
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { DatabaseService } from '@/lib/database'
+import { processMarksheetArrears } from '@/lib/arrears'
 
 interface MarksheetData {
   studentName: string
@@ -73,53 +74,6 @@ export default function MarksheetUploadSection({ userId, currentRollNo, onDataEx
 
     setFile(selectedFile)
     setMessage(null)
-  }
-
-  const calculateArrears = (courses: any[]): { historyCount: number, currentCount: number } => {
-    let historyCount = 0
-    let currentCount = 0
-
-    // Group courses by course code to track re-attempts
-    const courseMap = new Map<string, any[]>()
-    
-    courses.forEach(course => {
-      const code = course.course_code
-      if (!courseMap.has(code)) {
-        courseMap.set(code, [])
-      }
-      courseMap.get(code)!.push(course)
-    })
-
-    // Check each course group
-    courseMap.forEach((attempts, courseCode) => {
-      // Sort by semester to get chronological order
-      attempts.sort((a, b) => parseInt(a.sem) - parseInt(b.sem))
-      
-      let hadArrear = false
-      let isCleared = false
-
-      attempts.forEach(attempt => {
-        const result = (attempt.result || '').toLowerCase()
-        const grade = (attempt.letter_grade || '').toUpperCase()
-        
-        // Check if it's a fail/arrear
-        if (result.includes('fail') || result === 'ra' || grade === 'RA' || grade === 'F' || grade === 'U' || grade === 'W' || grade === 'AB') {
-          hadArrear = true
-        } else if (hadArrear && (result.includes('pass') || grade === 'P' || (grade !== 'RA' && grade !== 'F' && grade !== 'U' && grade !== 'W' && grade !== 'AB'))) {
-          // If had arrear before and now passed
-          isCleared = true
-        }
-      })
-
-      if (hadArrear) {
-        historyCount++ // Increment history for any course that ever had an arrear
-        if (!isCleared) {
-          currentCount++ // Only count as current if not cleared yet
-        }
-      }
-    })
-
-    return { historyCount, currentCount }
   }
 
   const handleExtract = async () => {
@@ -186,11 +140,7 @@ export default function MarksheetUploadSection({ userId, currentRollNo, onDataEx
         console.warn('⚠️ Authenticity warnings:', authenticityData)
       }
 
-      // Calculate arrears from courses
-      const courses = extracted.courses || []
-      const arrears = calculateArrears(courses)
-
-      // Prepare marksheet data
+      // Prepare basic marksheet data first (without arrears)
       const data: MarksheetData = {
         studentName: result.data.studentName || extracted.student_details?.name || '',
         registerNumber: result.data.registerNumber || extracted.student_details?.register_no || '',
@@ -203,8 +153,8 @@ export default function MarksheetUploadSection({ userId, currentRollNo, onDataEx
         totalCreditsEarned: result.data.totalCreditsEarned || extracted.summary?.credits_earned?.toString() || '0',
         totalCreditsRegistered: result.data.totalCreditsRegistered || extracted.summary?.credits_registered?.toString() || '0',
         institution: result.data.institution || extracted.institution || '',
-        historyOfArrearsCount: arrears.historyCount,
-        currentArrearsCount: arrears.currentCount
+        historyOfArrearsCount: 0,
+        currentArrearsCount: 0
       }
 
       // Validate critical fields
@@ -214,6 +164,29 @@ export default function MarksheetUploadSection({ userId, currentRollNo, onDataEx
 
       if (!data.semester || parseInt(data.semester) < 1 || parseInt(data.semester) > 8) {
         throw new Error(`Invalid semester number detected: ${data.semester}. Expected a value between 1 and 8.`);
+      }
+
+      // Process arrears using the new arrears service
+      const courses = extracted.courses || []
+      const semester = parseInt(data.semester)
+      const academicYear = data.academicYear || ''
+      
+      try {
+        const arrears = await processMarksheetArrears(
+          userId,
+          data.studentName,
+          data.registerNumber,
+          semester,
+          academicYear,
+          courses
+        )
+        
+        // Update data with arrear counts
+        data.historyOfArrearsCount = arrears.historyCount
+        data.currentArrearsCount = arrears.currentCount
+      } catch (arrearError) {
+        console.error('Error processing arrears:', arrearError)
+        // Continue with 0 arrears if there's an error
       }
 
       setMarksheetData(data)
@@ -504,38 +477,6 @@ export default function MarksheetUploadSection({ userId, currentRollNo, onDataEx
                   <p className="font-medium">
                     {marksheetData.totalCreditsEarned} / {marksheetData.totalCreditsRegistered}
                   </p>
-                )}
-              </div>
-              <div>
-                <Label className="text-muted-foreground">History of Arrears</Label>
-                {isEditing ? (
-                  <Input
-                    type="number"
-                    min="0"
-                    value={marksheetData.historyOfArrearsCount}
-                    onChange={(e) => handleEditField('historyOfArrearsCount', parseInt(e.target.value) || 0)}
-                    className="mt-1"
-                  />
-                ) : (
-                  <Badge variant={marksheetData.historyOfArrearsCount > 0 ? "destructive" : "outline"}>
-                    {marksheetData.historyOfArrearsCount} arrear(s)
-                  </Badge>
-                )}
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Current Arrears</Label>
-                {isEditing ? (
-                  <Input
-                    type="number"
-                    min="0"
-                    value={marksheetData.currentArrearsCount}
-                    onChange={(e) => handleEditField('currentArrearsCount', parseInt(e.target.value) || 0)}
-                    className="mt-1"
-                  />
-                ) : (
-                  <Badge variant={marksheetData.currentArrearsCount > 0 ? "destructive" : "default"}>
-                    {marksheetData.currentArrearsCount} active
-                  </Badge>
                 )}
               </div>
             </div>

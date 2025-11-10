@@ -125,9 +125,22 @@ export default function MarksheetUploadPage() {
       
     } catch (error: any) {
       console.error('Upload error:', error)
+      
+      // Provide helpful error messages
+      let errorMessage = error.message || 'Failed to upload and extract marksheet data'
+      
+      // Check for common AI service errors
+      if (errorMessage.includes('service is currently unavailable') || 
+          errorMessage.includes('No instances available') ||
+          errorMessage.includes('503')) {
+        errorMessage = '⚠️ The AI vision service is temporarily overloaded. Please wait 1-2 minutes and try again. This happens with free AI models during peak hours.'
+      } else if (errorMessage.includes('Failed to extract marksheet')) {
+        errorMessage = errorMessage + ' The free AI service may be experiencing high traffic. Please try again in a few minutes.'
+      }
+      
       setMessage({
         type: 'error',
-        text: error.message || 'Failed to upload and extract marksheet data'
+        text: errorMessage
       })
       setUploadProgress(0)
     } finally {

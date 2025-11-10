@@ -100,41 +100,114 @@ Important:
 - Convert all numeric values to actual numbers (not strings)
 - Use null for missing fields`
 
-    // Call OpenRouter with vision model
-    const openRouterResp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-        'X-Title': 'GCT Placement Portal - Marksheet OCR'
-      },
-      body: JSON.stringify({
-        model: process.env.VISION_MODEL || 'qwen/qwen2.5-vl-32b-instruct:free',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: promptText },
-              { type: 'image_url', image_url: { url: base64DataUrl } }
-            ]
-          }
-        ],
-        max_tokens: 2500,
-        temperature: 0.1
-      })
-    })
+    // Call OpenRouter with vision model - with retry logic
+    const maxRetries = 3
+    const retryDelay = 2000 // 2 seconds
+    let openRouterResp: Response | null = null
+    let lastError: string = ''
 
-    if (!openRouterResp.ok) {
-      const errText = await openRouterResp.text()
-      console.error('OpenRouter API error:', errText)
-      throw new Error('OpenRouter API error: ' + errText)
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`OpenRouter API attempt ${attempt}/${maxRetries}...`)
+        
+        // Add timeout to fetch request
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+        
+        openRouterResp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+            'X-Title': 'GCT Placement Portal - Marksheet OCR'
+          },
+          body: JSON.stringify({
+            model: process.env.VISION_MODEL || 'qwen/qwen2.5-vl-32b-instruct:free',
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: promptText },
+                  { type: 'image_url', image_url: { url: base64DataUrl } }
+                ]
+              }
+            ],
+            max_tokens: 2500,
+            temperature: 0.1
+          }),
+          signal: controller.signal
+        })
+        
+        clearTimeout(timeoutId)
+
+        if (openRouterResp.ok) {
+          console.log(`✅ OpenRouter API success on attempt ${attempt}`)
+          break
+        }
+
+        // Check if it's a 503 (service unavailable) error
+        const errText = await openRouterResp.text()
+        lastError = errText
+        
+        if (openRouterResp.status === 503 && attempt < maxRetries) {
+          console.warn(`⚠️ OpenRouter service unavailable (attempt ${attempt}/${maxRetries}), retrying in ${retryDelay}ms...`)
+          console.warn('Error details:', errText)
+          await new Promise(resolve => setTimeout(resolve, retryDelay * attempt)) // Exponential backoff
+          continue
+        }
+
+        // For other errors, don't retry
+        console.error('OpenRouter API error:', errText)
+        throw new Error(`OpenRouter API failed with status ${openRouterResp.status}: ${errText}`)
+        
+      } catch (error: any) {
+        lastError = error.message
+        
+        // Check if it's an abort error (timeout)
+        if (error.name === 'AbortError') {
+          console.warn(`⏱️ Request timed out (attempt ${attempt}/${maxRetries})`)
+          lastError = 'Request timed out after 30 seconds'
+        }
+        
+        if (attempt === maxRetries) {
+          // Provide more helpful error message
+          let errorMessage = `Failed to extract marksheet after ${maxRetries} attempts. `
+          
+          if (lastError.includes('fetch failed') || lastError.includes('ECONNREFUSED')) {
+            errorMessage += 'Network connection error. Please check:\n' +
+              '1. Your internet connection\n' +
+              '2. OpenRouter API is accessible (try: curl https://openrouter.ai/api/v1/models)\n' +
+              '3. No firewall blocking the request'
+          } else if (lastError.includes('timeout')) {
+            errorMessage += 'The request timed out. The AI service may be slow or overloaded. Please try again.'
+          } else if (lastError.includes('401') || lastError.includes('authentication')) {
+            errorMessage += 'API authentication failed. Please verify OPENROUTER_API_KEY in .env.local'
+          } else {
+            errorMessage += `The AI vision service is currently unavailable. Please try again in a few minutes. `
+          }
+          
+          errorMessage += `\n\nLast error: ${lastError}`
+          
+          throw new Error(errorMessage)
+        }
+        
+        console.warn(`Attempt ${attempt} failed, retrying...`)
+        await new Promise(resolve => setTimeout(resolve, retryDelay * attempt))
+      }
+    }
+
+    if (!openRouterResp || !openRouterResp.ok) {
+      throw new Error(
+        'Failed to connect to AI vision service. Please try again later. ' +
+        'The free AI model may be temporarily overloaded.'
+      )
     }
 
     const orJson = await openRouterResp.json()
     const assistantContent = orJson?.choices?.[0]?.message?.content || ''
 
-    console.log('OpenRouter response received')
+    console.log('✅ OpenRouter response received successfully')
 
     // Parse the extracted JSON
     let extractedData: any = {}
