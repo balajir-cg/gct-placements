@@ -48,6 +48,13 @@ export default async ({ req, res, log, error }) => {
         jobsWithDeadlines++;
         log(`Found job with deadline tomorrow: "${job.title}"`);
         
+        // Extract job eligibility criteria
+        const minCGPA = parseFloat(job.minCGPA) || 0;
+        const noBacklogs = job.noBacklogs || false;
+        const eligibleDepartments = Array.isArray(job.departments) ? job.departments : [];
+        
+        log(`  Job criteria: minCGPA=${minCGPA}, noBacklogs=${noBacklogs}, departments=${eligibleDepartments.join(', ')}`);
+        
         // Get all applications for this job
         const applications = await databases.listDocuments(
           databaseId,
@@ -83,12 +90,37 @@ export default async ({ req, res, log, error }) => {
           offset += limit;
         }
 
-        // Filter students who haven't applied
-        const studentsToNotify = allStudents.filter(
-          student => !appliedUserIds.includes(student.$id)
-        );
+        // Filter students who haven't applied AND meet eligibility criteria
+        const studentsToNotify = allStudents.filter(student => {
+          // Skip if already applied
+          if (appliedUserIds.includes(student.$id)) {
+            return false;
+          }
 
-        log(`  Sending reminder to ${studentsToNotify.length} students`);
+          // Check department eligibility
+          if (eligibleDepartments.length > 0 && !eligibleDepartments.includes(student.department)) {
+            return false;
+          }
+
+          // Check CGPA eligibility
+          const studentCGPA = parseFloat(student.currentCgpa) || 0;
+          if (studentCGPA < minCGPA) {
+            return false;
+          }
+
+          // Check backlog eligibility
+          if (noBacklogs) {
+            const hasActiveBacklog = student.activeBacklog === 'Yes';
+            const hasHistoryOfArrear = student.historyOfArrear === 'Yes';
+            if (hasActiveBacklog || hasHistoryOfArrear) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+
+        log(`  Sending reminder to ${studentsToNotify.length} eligible students who haven't applied`);
 
         // Create notifications in batches
         const batchSize = 50;

@@ -69,7 +69,7 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       const [jobsData] = await Promise.all([
-        DatabaseService.getJobs()
+        DatabaseService.getAllJobs()
       ])
       setJobs(jobsData)
       await fetchAllApplications()

@@ -62,7 +62,7 @@ function ManageJobsContent() {
   const fetchJobs = async () => {
     try {
       setLoading(true)
-      const jobsData = await DatabaseService.getJobs()
+      const jobsData = await DatabaseService.getAllJobs()
       setJobs(jobsData)
       
       // Fetch application counts for each job

@@ -25,20 +25,31 @@ export async function POST(request: NextRequest) {
     const usersCollectionId = process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID || '';
     const notificationsCollectionId = process.env.NEXT_PUBLIC_APPWRITE_NOTIFICATIONS_COLLECTION_ID || '';
 
-    // Get the job details to get the deadline
+    // Get the job details to get the deadline and eligibility criteria
     let deadline = applicationDeadline;
-    if (!deadline) {
-      try {
-        const job = await databases.getDocument(
-          databaseId,
-          process.env.NEXT_PUBLIC_APPWRITE_JOBS_COLLECTION_ID || '',
-          jobId
-        );
-        deadline = job.applicationDeadline;
-      } catch (error) {
-        console.error('Error fetching job details:', error);
-      }
+    let job: any = null;
+    
+    try {
+      job = await databases.getDocument(
+        databaseId,
+        process.env.NEXT_PUBLIC_APPWRITE_JOBS_COLLECTION_ID || '',
+        jobId
+      );
+      deadline = job.applicationDeadline;
+    } catch (error) {
+      console.error('Error fetching job details:', error);
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch job details' },
+        { status: 500 }
+      );
     }
+
+    // Extract job eligibility criteria
+    const minCGPA = parseFloat(job.minCGPA) || 0;
+    const noBacklogs = job.noBacklogs || false;
+    const eligibleDepartments = Array.isArray(job.departments) ? job.departments : [];
+
+    console.log(`Job criteria: minCGPA=${minCGPA}, noBacklogs=${noBacklogs}, departments=${eligibleDepartments.join(', ')}`);
 
     // Get all students with their email addresses
     let allStudents: any[] = [];
@@ -64,7 +75,34 @@ export async function POST(request: NextRequest) {
       offset += limit;
     }
 
-    console.log(`Found ${allStudents.length} students to notify`);
+    console.log(`Found ${allStudents.length} total students`);
+
+    // Filter students based on eligibility criteria
+    const eligibleStudents = allStudents.filter(student => {
+      // Check department eligibility
+      if (eligibleDepartments.length > 0 && !eligibleDepartments.includes(student.department)) {
+        return false;
+      }
+
+      // Check CGPA eligibility
+      const studentCGPA = parseFloat(student.currentCgpa) || 0;
+      if (studentCGPA < minCGPA) {
+        return false;
+      }
+
+      // Check backlog eligibility
+      if (noBacklogs) {
+        const hasActiveBacklog = student.activeBacklog === 'Yes';
+        const hasHistoryOfArrear = student.historyOfArrear === 'Yes';
+        if (hasActiveBacklog || hasHistoryOfArrear) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    console.log(`Found ${eligibleStudents.length} eligible students to notify`);
 
     // Create notifications and prepare email data in batches
     const batchSize = 50;
@@ -72,8 +110,8 @@ export async function POST(request: NextRequest) {
     let errorCount = 0;
     let emailCount = 0;
 
-    for (let i = 0; i < allStudents.length; i += batchSize) {
-      const batch = allStudents.slice(i, i + batchSize);
+    for (let i = 0; i < eligibleStudents.length; i += batchSize) {
+      const batch = eligibleStudents.slice(i, i + batchSize);
       
       const promises = batch.map(async (student) => {
         try {
@@ -124,12 +162,18 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Notifications sent to ${successCount} students`,
+      message: `Notifications sent to ${successCount} eligible students`,
       stats: {
-        total: allStudents.length,
+        totalStudents: allStudents.length,
+        eligibleStudents: eligibleStudents.length,
         success: successCount,
         errors: errorCount,
-        emailsPrepared: emailCount
+        emailsPrepared: emailCount,
+        criteria: {
+          minCGPA,
+          noBacklogs,
+          departments: eligibleDepartments
+        }
       }
     });
 

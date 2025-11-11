@@ -51,6 +51,13 @@ export async function POST(request: NextRequest) {
         jobsWithDeadlines++
         console.log(`⏰ Found job with deadline tomorrow: "${job.title}" at ${job.companyName}`)
         
+        // Extract job eligibility criteria
+        const minCGPA = parseFloat(job.minCGPA) || 0;
+        const noBacklogs = job.noBacklogs || false;
+        const eligibleDepartments = Array.isArray(job.departments) ? job.departments : [];
+        
+        console.log(`  📋 Job criteria: minCGPA=${minCGPA}, noBacklogs=${noBacklogs}, departments=${eligibleDepartments.join(', ')}`);
+        
         // Get all applications for this job
         const applications = await databases.listDocuments(
           config.databaseId,
@@ -86,12 +93,37 @@ export async function POST(request: NextRequest) {
           offset += limit
         }
 
-        // Filter students who haven't applied
-        const studentsToNotify = allStudents.filter(
-          student => !appliedUserIds.includes(student.$id)
-        )
+        // Filter students who haven't applied AND meet eligibility criteria
+        const studentsToNotify = allStudents.filter(student => {
+          // Skip if already applied
+          if (appliedUserIds.includes(student.$id)) {
+            return false;
+          }
 
-        console.log(`  📤 Sending deadline reminder to ${studentsToNotify.length} students`)
+          // Check department eligibility
+          if (eligibleDepartments.length > 0 && !eligibleDepartments.includes(student.department)) {
+            return false;
+          }
+
+          // Check CGPA eligibility
+          const studentCGPA = parseFloat(student.currentCgpa) || 0;
+          if (studentCGPA < minCGPA) {
+            return false;
+          }
+
+          // Check backlog eligibility
+          if (noBacklogs) {
+            const hasActiveBacklog = student.activeBacklog === 'Yes';
+            const hasHistoryOfArrear = student.historyOfArrear === 'Yes';
+            if (hasActiveBacklog || hasHistoryOfArrear) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+
+        console.log(`  📤 Sending deadline reminder to ${studentsToNotify.length} eligible students who haven't applied`)
 
         // Create deadline reminder notifications and emails in batches
         const batchSize = 50

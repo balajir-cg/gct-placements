@@ -42,6 +42,32 @@ export class DatabaseService {
 
   static async getJobs() {
     try {
+      // Get current date in ISO format to filter out expired jobs
+      const currentDate = new Date().toISOString()
+      
+      const response = await databases.listDocuments(
+        config.databaseId,
+        config.collections.jobs,
+        [
+          Query.greaterThanEqual('applicationDeadline', currentDate),
+          Query.limit(100)
+        ]
+      )
+      const jobs = response.documents as unknown as any[]
+      // Convert departments strings back to arrays
+      return jobs.map(job => ({
+        ...job,
+        departments: this.departmentsToArray(job.departments || '')
+      })) as Job[]
+    } catch (error) {
+      console.error('Error fetching jobs:', error)
+      throw error
+    }
+  }
+
+  // Get all jobs including expired ones (for admin use)
+  static async getAllJobs() {
+    try {
       const response = await databases.listDocuments(
         config.databaseId,
         config.collections.jobs,
@@ -56,7 +82,7 @@ export class DatabaseService {
         departments: this.departmentsToArray(job.departments || '')
       })) as Job[]
     } catch (error) {
-      console.error('Error fetching jobs:', error)
+      console.error('Error fetching all jobs:', error)
       throw error
     }
   }

@@ -17,6 +17,13 @@ export default async ({ req, res, log, error }) => {
     log(`Job: ${eventData.title} at ${eventData.companyName}`);
     log(`Deadline: ${eventData.applicationDeadline}`);
 
+    // Extract job eligibility criteria
+    const minCGPA = parseFloat(eventData.minCGPA) || 0;
+    const noBacklogs = eventData.noBacklogs || false;
+    const eligibleDepartments = Array.isArray(eventData.departments) ? eventData.departments : [];
+    
+    log(`Criteria: minCGPA=${minCGPA}, noBacklogs=${noBacklogs}, departments=${eligibleDepartments.join(', ')}`);
+
     const databaseId = process.env.APPWRITE_DATABASE_ID;
     const usersCollectionId = process.env.APPWRITE_USERS_COLLECTION_ID;
     const notificationsCollectionId = process.env.APPWRITE_NOTIFICATIONS_COLLECTION_ID;
@@ -46,14 +53,41 @@ export default async ({ req, res, log, error }) => {
       offset += limit;
     }
 
-    log(`Found ${allStudents.length} students to notify`);
+    log(`Found ${allStudents.length} total students`);
 
-    // Create notifications for all students in batches
+    // Filter students based on eligibility criteria
+    const eligibleStudents = allStudents.filter(student => {
+      // Check department eligibility
+      if (eligibleDepartments.length > 0 && !eligibleDepartments.includes(student.department)) {
+        return false;
+      }
+
+      // Check CGPA eligibility
+      const studentCGPA = parseFloat(student.currentCgpa) || 0;
+      if (studentCGPA < minCGPA) {
+        return false;
+      }
+
+      // Check backlog eligibility
+      if (noBacklogs) {
+        const hasActiveBacklog = student.activeBacklog === 'Yes';
+        const hasHistoryOfArrear = student.historyOfArrear === 'Yes';
+        if (hasActiveBacklog || hasHistoryOfArrear) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    log(`Found ${eligibleStudents.length} eligible students to notify`);
+
+    // Create notifications for all eligible students in batches
     const batchSize = 50;
     let successCount = 0;
 
-    for (let i = 0; i < allStudents.length; i += batchSize) {
-      const batch = allStudents.slice(i, i + batchSize);
+    for (let i = 0; i < eligibleStudents.length; i += batchSize) {
+      const batch = eligibleStudents.slice(i, i + batchSize);
       
       const notificationPromises = batch.map(student =>
         databases.createDocument(
@@ -79,12 +113,19 @@ export default async ({ req, res, log, error }) => {
       await Promise.all(notificationPromises);
     }
 
-    log(`✅ Successfully sent ${successCount} notifications`);
+    log(`✅ Successfully sent ${successCount} notifications to eligible students`);
 
     return res.json({
       success: true,
       notificationsSent: successCount,
-      jobTitle: eventData.title
+      totalStudents: allStudents.length,
+      eligibleStudents: eligibleStudents.length,
+      jobTitle: eventData.title,
+      criteria: {
+        minCGPA,
+        noBacklogs,
+        departments: eligibleDepartments
+      }
     });
 
   } catch (err) {
